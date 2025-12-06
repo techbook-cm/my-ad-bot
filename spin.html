@@ -373,15 +373,21 @@
 
             overlay.style.display = "flex";
 
-            // Send result to Telegram bot IMMEDIATELY
-            if (isInTelegram) {
-                tg.sendData("spin_result:" + amount);
-            }
+            // Store the amount for sending later
+            window.spinResult = amount;
         }
 
         function closeResult() {
             document.getElementById("resultOverlay").style.display = "none";
-            // Data already sent in showResult, just close overlay
+
+            // Send result to Telegram bot when user clicks OK
+            if (isInTelegram && tg) {
+                console.log("Sending data: spin_result:" + window.spinResult);
+                tg.sendData("spin_result:" + window.spinResult);
+            } else {
+                console.log("Not in Telegram, cannot send data");
+                alert("Result: ₹" + window.spinResult + " (Debug: Not in Telegram)");
+            }
         }
     </script>
 </body>
