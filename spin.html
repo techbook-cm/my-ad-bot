@@ -1,153 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spin & Win</title>
+    <title>Spin Wheel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #2c3e50;
+            background-color: #1a1a1a;
             color: white;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
 
-        .machine-container {
-            background: #f1c40f;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 0 #c0392b;
-            text-align: center;
-            width: 80%;
-            max-width: 300px;
-        }
-
-        .window {
-            background: white;
-            color: black;
-            font-size: 60px;
-            font-weight: bold;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* The Wheel Container */
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
             margin-bottom: 20px;
-            border: 5px solid #333;
-            border-radius: 10px;
         }
+
+        /* The Triangle Pointer */
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid white;
+            z-index: 10;
+        }
+
+        /* The Rotating Wheel */
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid white;
+            /* Create 4 Segments using Conic Gradient */
+            background: conic-gradient(
+                #e74c3c 0% 90deg,   /* Red: Better Luck */
+                #f1c40f 90deg 180deg, /* Yellow: $1 */
+                #3498db 180deg 270deg, /* Blue: $3 */
+                #9b59b6 270deg 360deg  /* Purple: $5 */
+            );
+            transition: transform 4s cubic-bezier(0.2, 0.8, 0.3, 1);
+            position: relative;
+        }
+
+        /* Text Labels inside the wheel */
+        .label {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 1px 1px 2px black;
+        }
+        /* Positioning the text in the 4 corners */
+        .l1 { transform: rotate(45deg) translate(0, -110px); } /* Top Right */
+        .l2 { transform: rotate(135deg) translate(0, -110px); } /* Bottom Right */
+        .l3 { transform: rotate(225deg) translate(0, -110px); } /* Bottom Left */
+        .l4 { transform: rotate(315deg) translate(0, -110px); } /* Top Left */
 
         button {
-            background-color: #e74c3c;
+            padding: 15px 40px;
+            font-size: 20px;
+            background-color: #2ecc71;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 20px;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 5px 0 #a93226;
             font-weight: bold;
-            width: 100%;
+            box-shadow: 0 5px 0 #27ae60;
         }
-
-        button:active {
-            transform: translateY(5px);
-            box-shadow: none;
-        }
-
         button:disabled {
             background-color: #95a5a6;
             box-shadow: none;
-            cursor: not-allowed;
         }
-
-        p {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #333;
-        }
+        .cost { margin-top: 10px; color: #ccc; }
     </style>
 </head>
-
 <body>
 
-    <div class="machine-container">
-        <div class="window" id="slot">7</div>
-        <button id="spinBtn" onclick="spinWheel()">🎰 SPIN ($2)</button>
-        <p>Jackpot: $20 | Win: $5</p>
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+            <div class="label l1">Better<br>Luck</div> <div class="label l2">$1</div>         <div class="label l3">$3</div>         <div class="label l4">$5</div>         </div>
     </div>
+
+    <button id="spinBtn" onclick="spin()">SPIN</button>
+    <div class="cost">Cost: $2.00</div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function spinWheel() {
-            const slot = document.getElementById("slot");
-            const btn = document.getElementById("spinBtn");
+        let currentRotation = 0;
 
-            // Disable button
+        function spin() {
+            const btn = document.getElementById("spinBtn");
+            const wheel = document.getElementById("wheel");
+            
             btn.disabled = true;
             btn.innerText = "Spinning...";
 
-            let counter = 0;
-            let finalResult = 0;
-
-            // Animation Loop
-            const interval = setInterval(() => {
-                const randomNum = Math.floor(Math.random() * 9) + 1;
-                slot.innerText = randomNum;
-                counter++;
-
-                if (counter > 20) {
-                    clearInterval(interval);
-                    determineWin();
-                }
-            }, 100);
-        }
-
-        function determineWin() {
-            // LOGIC: Define winning chances here
-            // 7 = Jackpot ($20)
-            // 5 = Win ($5)
-            // Others = Loss ($0)
-
+            // 1. Determine Result based on your percentages
             const rand = Math.random();
             let winAmount = 0;
-            let finalDisplay = 1;
+            let stopAngle = 0;
 
-            if (rand < 0.05) {
-                // 5% Chance for Jackpot
-                winAmount = 20;
-                finalDisplay = 7;
-            } else if (rand < 0.25) {
-                // 20% Chance for Small Win
-                winAmount = 5;
-                finalDisplay = 5;
-            } else {
-                // 75% Chance to Lose
+            // Math Logic:
+            // 70% Chance = Loss ($0) -> Target Red (0-90 deg) -> Stop approx 45
+            // 28% Chance = $1 -> Target Yellow (90-180 deg) -> Stop approx 135
+            // 2% Chance = $3 -> Target Blue (180-270 deg) -> Stop approx 225
+            // 0% Chance = $5 -> Target Purple (270-360) -> Impossible
+
+            // NOTE: The pointer is at the TOP (0 degrees). 
+            // Rotating the wheel CLOCKWISE moves the segment at 0 degrees away.
+            // To land on 0-90 (Red), we actually need to rotate nearly a full circle (270-360 range relative).
+            // To make it simple, we calculate the Target Degree on the circle, then subtract from 360.
+            
+            if (rand < 0.70) {
+                // 70% LOSS (Red Section: 0-90 visual)
+                // To put 45deg at top, we rotate -45 (or 315)
                 winAmount = 0;
-                finalDisplay = Math.floor(Math.random() * 4) + 1; // Random non-winning number
+                stopAngle = 360 - 45; // Lands in middle of Red
+            } 
+            else if (rand < 0.98) {
+                // 28% WIN $1 (Yellow Section: 90-180 visual)
+                // To put 135deg at top, we rotate -135
+                winAmount = 1;
+                stopAngle = 360 - 135; // Lands in middle of Yellow
+            } 
+            else {
+                // 2% WIN $3 (Blue Section: 180-270 visual)
+                // To put 225deg at top, we rotate -225
+                winAmount = 3;
+                stopAngle = 360 - 225; // Lands in middle of Blue
             }
 
-            document.getElementById("slot").innerText = finalDisplay;
+            // Add some randomness so it doesn't land on the exact same pixel every time (+- 20 deg)
+            const randomOffset = Math.floor(Math.random() * 40) - 20; 
+            stopAngle += randomOffset;
 
+            // 2. Calculate Full Spins (5 spins minimum to look cool)
+            const spins = 5 * 360; 
+            
+            // 3. Set the new rotation
+            // We add to currentRotation so it doesn't spin backwards next time
+            currentRotation += spins + stopAngle;
+            
+            // Fix: Ensure we land on the correct calculation by adjusting for previous modulo
+            // A simple CSS rotate is additive.
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            // 4. Wait for animation (4 seconds)
             setTimeout(() => {
-                if (winAmount > 0) {
-                    alert(`🎉 YOU WON $${winAmount}!`);
-                } else {
-                    alert("😔 You lost. Try again!");
-                }
-                // Send result to Bot: "spin_complete:WIN_AMOUNT"
-                tg.sendData("spin_complete:" + winAmount);
-            }, 500);
+                let msg = "";
+                if(winAmount === 0) msg = "Better luck next time! 😔";
+                else msg = `🎉 YOU WON $${winAmount}!`;
+
+                alert(msg);
+                
+                // Send Data to Bot: "spin_result:WIN_AMOUNT"
+                tg.sendData("spin_result:" + winAmount);
+                
+                // We keep the button disabled because the bot will likely reply and we want them to read it.
+                // Or you can re-enable:
+                // btn.disabled = false; btn.innerText = "SPIN";
+            }, 4100);
         }
     </script>
 </body>
-
 </html>
