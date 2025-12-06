@@ -279,10 +279,18 @@
         let tg = null;
         let isInTelegram = false;
 
-        if (window.Telegram && window.Telegram.WebApp) {
-            tg = window.Telegram.WebApp;
-            tg.expand();
-            isInTelegram = true;
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                tg = window.Telegram.WebApp;
+                tg.ready();  // IMPORTANT: Tell Telegram the WebApp is ready
+                tg.expand();
+                isInTelegram = true;
+                console.log("Telegram WebApp initialized successfully");
+            } else {
+                console.log("Not running inside Telegram");
+            }
+        } catch (e) {
+            console.error("Error initializing Telegram WebApp:", e);
         }
 
         let currentRotation = 0;
@@ -382,11 +390,16 @@
 
             // Send result to Telegram bot when user clicks OK
             if (isInTelegram && tg) {
-                console.log("Sending data: spin_result:" + window.spinResult);
-                tg.sendData("spin_result:" + window.spinResult);
+                try {
+                    console.log("Sending data: spin_result:" + window.spinResult);
+                    tg.sendData("spin_result:" + window.spinResult);
+                    // If we get here without error, data was sent
+                } catch (error) {
+                    console.error("sendData error:", error);
+                    alert("Error sending data: " + error.message);
+                }
             } else {
-                console.log("Not in Telegram, cannot send data");
-                alert("Result: ₹" + window.spinResult + " (Debug: Not in Telegram)");
+                alert("❌ Not connected to Telegram!\n\nisInTelegram: " + isInTelegram + "\ntg: " + (tg ? "exists" : "null"));
             }
         }
     </script>
