@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Win</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .machine-container {
+            background: #f1c40f;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 0 #c0392b;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .window {
+            background: white;
+            color: black;
+            font-size: 60px;
+            font-weight: bold;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 5px solid #333;
+            border-radius: 10px;
+        }
+
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #a93226;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        button:disabled {
+            background-color: #95a5a6;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        p {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="machine-container">
+        <div class="window" id="slot">7</div>
+        <button id="spinBtn" onclick="spinWheel()">🎰 SPIN ($2)</button>
+        <p>Jackpot: $20 | Win: $5</p>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function spinWheel() {
+            const slot = document.getElementById("slot");
+            const btn = document.getElementById("spinBtn");
+
+            // Disable button
+            btn.disabled = true;
+            btn.innerText = "Spinning...";
+
+            let counter = 0;
+            let finalResult = 0;
+
+            // Animation Loop
+            const interval = setInterval(() => {
+                const randomNum = Math.floor(Math.random() * 9) + 1;
+                slot.innerText = randomNum;
+                counter++;
+
+                if (counter > 20) {
+                    clearInterval(interval);
+                    determineWin();
+                }
+            }, 100);
+        }
+
+        function determineWin() {
+            // LOGIC: Define winning chances here
+            // 7 = Jackpot ($20)
+            // 5 = Win ($5)
+            // Others = Loss ($0)
+
+            const rand = Math.random();
+            let winAmount = 0;
+            let finalDisplay = 1;
+
+            if (rand < 0.05) {
+                // 5% Chance for Jackpot
+                winAmount = 20;
+                finalDisplay = 7;
+            } else if (rand < 0.25) {
+                // 20% Chance for Small Win
+                winAmount = 5;
+                finalDisplay = 5;
+            } else {
+                // 75% Chance to Lose
+                winAmount = 0;
+                finalDisplay = Math.floor(Math.random() * 4) + 1; // Random non-winning number
+            }
+
+            document.getElementById("slot").innerText = finalDisplay;
+
+            setTimeout(() => {
+                if (winAmount > 0) {
+                    alert(`🎉 YOU WON $${winAmount}!`);
+                } else {
+                    alert("😔 You lost. Try again!");
+                }
+                // Send result to Bot: "spin_complete:WIN_AMOUNT"
+                tg.sendData("spin_complete:" + winAmount);
+            }, 500);
+        }
+    </script>
+</body>
+
+</html>
