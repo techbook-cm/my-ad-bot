@@ -372,15 +372,16 @@
             }
 
             overlay.style.display = "flex";
+
+            // Send result to Telegram bot IMMEDIATELY
+            if (isInTelegram) {
+                tg.sendData("spin_result:" + amount);
+            }
         }
 
         function closeResult() {
             document.getElementById("resultOverlay").style.display = "none";
-
-            // Send result to Telegram bot
-            if (isInTelegram) {
-                tg.sendData("spin_result:" + lastWinAmount);
-            }
+            // Data already sent in showResult, just close overlay
         }
     </script>
 </body>
