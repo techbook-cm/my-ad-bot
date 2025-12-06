@@ -104,25 +104,10 @@
             transform: translate(-50%, -50%);
         }
 
-        .l1 {
-            top: 30%;
-            left: 70%;
-        }
-
-        .l2 {
-            top: 70%;
-            left: 70%;
-        }
-
-        .l3 {
-            top: 70%;
-            left: 30%;
-        }
-
-        .l4 {
-            top: 30%;
-            left: 30%;
-        }
+        .l1 { top: 30%; left: 70%; }
+        .l2 { top: 70%; left: 70%; }
+        .l3 { top: 70%; left: 30%; }
+        .l4 { top: 30%; left: 30%; }
 
         .pointer {
             position: absolute;
@@ -192,7 +177,6 @@
             text-align: center;
         }
 
-        /* Result popup overlay */
         .result-overlay {
             display: none;
             position: fixed;
@@ -215,17 +199,8 @@
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
         }
 
-        .result-title {
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
-
-        .result-amount {
-            font-size: 48px;
-            color: #ffd700;
-            margin-bottom: 20px;
-        }
-
+        .result-title { font-size: 32px; margin-bottom: 15px; }
+        .result-amount { font-size: 48px; color: #ffd700; margin-bottom: 20px; }
         .result-btn {
             background: linear-gradient(180deg, #4caf50, #2e7d32);
             color: white;
@@ -239,7 +214,6 @@
 </head>
 
 <body>
-
     <div class="header">
         <div class="header-title">SPIN & WIN</div>
     </div>
@@ -251,7 +225,6 @@
                 <div class="wheel" id="wheel">
                     <div class="line"></div>
                     <div class="line line-h"></div>
-
                     <div class="label l1">₹0</div>
                     <div class="label l2">₹1</div>
                     <div class="label l3">₹3</div>
@@ -265,7 +238,6 @@
         <div class="status-text" id="statusText">COST: ₹2 per spin</div>
     </div>
 
-    <!-- Custom Result Popup -->
     <div class="result-overlay" id="resultOverlay">
         <div class="result-box">
             <div class="result-title" id="resultTitle">🎉 CONGRATULATIONS! 🎉</div>
@@ -275,34 +247,26 @@
     </div>
 
     <script>
-        // --- TELEGRAM API ---
         let tg = null;
         let isInTelegram = false;
 
         try {
             if (window.Telegram && window.Telegram.WebApp) {
                 tg = window.Telegram.WebApp;
-                tg.ready();  // IMPORTANT: Tell Telegram the WebApp is ready
+                tg.ready();
                 tg.expand();
                 isInTelegram = true;
-                console.log("Telegram WebApp initialized successfully");
-            } else {
-                console.log("Not running inside Telegram");
             }
         } catch (e) {
-            console.error("Error initializing Telegram WebApp:", e);
+            console.error("Error:", e);
         }
 
         let currentRotation = 0;
-        let lastWinAmount = 0;
 
-        // FIXED ROTATION VALUES - These are the EXACT angles that land on each prize
-        // When wheel is at these rotations, the pointer points to the CENTER of each segment
         const LANDING_ANGLES = {
-            "₹0": 315,  // Lands on Red (center of 0-90 segment)
-            "₹1": 225,  // Lands on Gold (center of 90-180 segment)
-            "₹3": 135   // Lands on Blue (center of 180-270 segment)
-            // ₹5 (Purple) = 45 degrees - WE NEVER USE THIS
+            "₹0": 315,
+            "₹1": 225,
+            "₹3": 135
         };
 
         function spin() {
@@ -313,50 +277,30 @@
             btn.disabled = true;
             status.innerText = "SPINNING...";
 
-            // --- PROBABILITY: 70% $0, 28% $1, 2% $3 ---
             const rand = Math.random();
-            let prize;
-            let winAmount;
+            let prize, winAmount;
 
             if (rand < 0.70) {
-                prize = "₹0";
-                winAmount = 0;
+                prize = "₹0"; winAmount = 0;
             } else if (rand < 0.98) {
-                prize = "₹1";
-                winAmount = 1;
+                prize = "₹1"; winAmount = 1;
             } else {
-                prize = "₹3";
-                winAmount = 3;
+                prize = "₹3"; winAmount = 3;
             }
 
-            lastWinAmount = winAmount;
+            window.spinResult = winAmount;
 
-            // --- FIXED ROTATION CALCULATION ---
-            // Get the target angle for this prize
             const targetAngle = LANDING_ANGLES[prize];
-
-            // Calculate where the wheel currently points (in 0-360 range)
             const currentAngle = currentRotation % 360;
-
-            // Calculate how much more we need to rotate to reach target
             let additionalRotation = targetAngle - currentAngle;
+            if (additionalRotation <= 0) additionalRotation += 360;
 
-            // Make sure we rotate forward (positive direction)
-            if (additionalRotation <= 0) {
-                additionalRotation += 360;
-            }
-
-            // Add 5 full spins (1800 degrees) for visual effect
-            // Add small random offset (±10 degrees) - safe within 45 degree segment
             const randomOffset = Math.floor(Math.random() * 20) - 10;
-
             const totalSpin = 1800 + additionalRotation + randomOffset;
 
-            // Apply rotation
             currentRotation += totalSpin;
             wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-            // --- SHOW RESULT AFTER SPIN ---
             setTimeout(() => {
                 status.innerText = "COST: ₹2 per spin";
                 btn.disabled = false;
@@ -380,26 +324,19 @@
             }
 
             overlay.style.display = "flex";
-
-            // Store the amount for sending later
-            window.spinResult = amount;
         }
 
         function closeResult() {
             document.getElementById("resultOverlay").style.display = "none";
 
-            // Send result to Telegram bot when user clicks OK
             if (isInTelegram && tg) {
                 try {
-                    console.log("Sending data: spin_result:" + window.spinResult);
                     tg.sendData("spin_result:" + window.spinResult);
-                    // If we get here without error, data was sent
                 } catch (error) {
-                    console.error("sendData error:", error);
-                    alert("Error sending data: " + error.message);
+                    alert("Error: " + error.message);
                 }
             } else {
-                alert("❌ Not connected to Telegram!\n\nisInTelegram: " + isInTelegram + "\ntg: " + (tg ? "exists" : "null"));
+                alert("❌ Not in Telegram!\n\nisInTelegram: " + isInTelegram);
             }
         }
     </script>
