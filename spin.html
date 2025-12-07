@@ -354,12 +354,11 @@
         function closeResult() {
             document.getElementById("resultOverlay").style.display = "none";
 
+            // Send result to bot (balance updates silently)
             if (isInTelegram && tg) {
                 try {
                     tg.sendData("spin_result:" + window.spinResult);
-                    setTimeout(function () {
-                        tg.close();
-                    }, 100);
+                    // App stays open - user can spin again
                 } catch (error) {
                     console.error("Send Error:", error);
                 }
