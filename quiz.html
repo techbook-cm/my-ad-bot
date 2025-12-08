@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quiz - Earn ₹0.05</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .reward {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+        }
+
+        .option.selected {
+            background: rgba(108, 92, 231, 0.5);
+            border-color: #6c5ce7;
+        }
+
+        .option.correct {
+            background: rgba(0, 184, 148, 0.5);
+            border-color: #00b894;
+        }
+
+        .option.wrong {
+            background: rgba(255, 107, 107, 0.5);
+            border-color: #ff6b6b;
+        }
+
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #f5576c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result {
+            display: none;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .result.correct {
+            display: block;
+            background: rgba(0, 184, 148, 0.3);
+            border: 2px solid #00b894;
+        }
+
+        .result.wrong {
+            display: block;
+            background: rgba(255, 107, 107, 0.3);
+            border: 2px solid #ff6b6b;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="container loading active">
+        <div class="spinner"></div>
+        <h2>Loading Ad...</h2>
+        <p>Please wait for the ad to complete</p>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quizScreen" class="container hidden">
+        <h1>❓ Quiz Time</h1>
+        <div class="reward">💰 Earn ₹0.05</div>
+
+        <div class="question-box">
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+
+        <div id="resultCorrect" class="result correct hidden">
+            ✅ Correct! Claiming reward...
+        </div>
+        <div id="resultWrong" class="result wrong hidden">
+            ❌ Wrong! The correct answer was: <span id="correctAnswerText"></span>
+        </div>
+    </div>
+
+    <!-- Monetag Ad Script -->
+    <script>
+        (function (d, z, s) { s.src = 'https://' + d + '/401/' + z; try { (document.body || document.documentElement).appendChild(s) } catch (e) { } })('vooculok.com', '3141294', document.createElement('script'));
+    </script>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Quiz questions bank
+        const questions = [
+            { q: "What is the capital of India?", options: ["Mumbai", "Delhi", "Kolkata", "Chennai"], answer: 1 },
+            { q: "How many days are in a week?", options: ["5", "6", "7", "8"], answer: 2 },
+            { q: "Which planet is known as the Red Planet?", options: ["Venus", "Jupiter", "Mars", "Saturn"], answer: 2 },
+            { q: "How many hours are in a day?", options: ["12", "20", "24", "48"], answer: 2 },
+            { q: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], answer: 3 },
+            { q: "Which animal is the King of the Jungle?", options: ["Tiger", "Lion", "Elephant", "Bear"], answer: 1 },
+            { q: "How many legs does a spider have?", options: ["4", "6", "8", "10"], answer: 2 },
+            { q: "What color is the sky on a clear day?", options: ["Green", "Red", "Blue", "Yellow"], answer: 2 },
+            { q: "What is 15 + 27?", options: ["40", "42", "44", "45"], answer: 1 },
+            { q: "How many months are in a year?", options: ["10", "11", "12", "13"], answer: 2 }
+        ];
+
+        let currentQuestion = null;
+        let answered = false;
+
+        function loadQuestion() {
+            currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+            document.getElementById('questionText').textContent = currentQuestion.q;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            currentQuestion.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = `${String.fromCharCode(65 + index)}) ${opt}`;
+                btn.onclick = () => selectAnswer(index, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(index, btn) {
+            if (answered) return;
+            answered = true;
+
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(opt => opt.disabled = true);
+
+            if (index === currentQuestion.answer) {
+                btn.classList.add('correct');
+                document.getElementById('resultCorrect').classList.remove('hidden');
+
+                setTimeout(() => {
+                    tg.sendData('quiz_success');
+                }, 1500);
+            } else {
+                btn.classList.add('wrong');
+                allOptions[currentQuestion.answer].classList.add('correct');
+                document.getElementById('correctAnswerText').textContent = currentQuestion.options[currentQuestion.answer];
+                document.getElementById('resultWrong').classList.remove('hidden');
+
+                setTimeout(() => {
+                    tg.sendData('quiz_failed');
+                }, 2000);
+            }
+        }
+
+        // Show quiz after ad (5 seconds)
+        setTimeout(() => {
+            document.getElementById('loadingScreen').classList.remove('active');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            loadQuestion();
+        }, 5000);
+    </script>
+</body>
+
+</html>
