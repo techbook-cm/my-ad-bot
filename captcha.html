@@ -156,6 +156,18 @@
 </head>
 
 <body>
+    <!-- Ad Blocker Warning Screen -->
+    <div id="adBlockScreen" class="container hidden">
+        <h1 style="color: #ff6b6b;">🚫 Ad Blocker Detected!</h1>
+        <p style="margin: 20px 0; line-height: 1.6;">
+            Please <strong>disable your ad blocker</strong> to continue.<br><br>
+            We need ads to pay your rewards!
+        </p>
+        <button onclick="location.reload()" style="margin-top: 10px;">
+            🔄 I've Disabled It - Refresh
+        </button>
+    </div>
+
     <!-- Loading Screen (shows while ad loads) -->
     <div id="loadingScreen" class="container loading active">
         <div class="spinner"></div>
@@ -182,15 +194,28 @@
         </div>
     </div>
 
-    <!-- Monetag Ad Script -->
+    <!-- Ad Blocker Detection Script -->
     <script>
-        (function (d, z, s) { s.src = 'https://' + d + '/401/' + z; try { (document.body || document.documentElement).appendChild(s) } catch (e) { } })('vooculok.com', '3141294', document.createElement('script'));
+        window.adBlockDetected = true; // Assume blocked until proven otherwise
+    </script>
+
+    <!-- Monetag Ad Script (if this loads, it sets adBlockDetected = false) -->
+    <script>
+        (function (d, z, s) {
+            s.src = 'https://' + d + '/401/' + z;
+            s.onload = function () { window.adBlockDetected = false; };
+            try { (document.body || document.documentElement).appendChild(s) } catch (e) { }
+        })('vooculok.com', '3141294', document.createElement('script'));
     </script>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
+
+        // Get token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token') || '';
 
         let correctAnswer = 0;
         let adCompleted = false;
@@ -211,13 +236,23 @@
             document.getElementById('mathProblem').textContent = `${num1} ${op} ${num2} = ?`;
         }
 
-        // Show captcha after ad (simulate ad completion after 5 seconds)
+        // Check for ad blocker after 2 seconds, then wait for full ad
         setTimeout(() => {
-            adCompleted = true;
-            document.getElementById('loadingScreen').classList.remove('active');
-            document.getElementById('captchaScreen').classList.remove('hidden');
-            generateCaptcha();
-        }, 5000);
+            if (window.adBlockDetected) {
+                // Ad blocker detected! Show warning
+                document.getElementById('loadingScreen').classList.remove('active');
+                document.getElementById('adBlockScreen').classList.remove('hidden');
+                return;
+            }
+
+            // Ad loaded successfully, wait remaining 3 seconds then show captcha
+            setTimeout(() => {
+                adCompleted = true;
+                document.getElementById('loadingScreen').classList.remove('active');
+                document.getElementById('captchaScreen').classList.remove('hidden');
+                generateCaptcha();
+            }, 3000);
+        }, 2000);
 
         function checkAnswer() {
             const userAnswer = parseInt(document.getElementById('answerInput').value);
@@ -228,9 +263,9 @@
                 document.getElementById('resultWrong').classList.add('hidden');
                 submitBtn.disabled = true;
 
-                // Send result to bot
+                // Send result to bot WITH TOKEN
                 setTimeout(() => {
-                    tg.sendData('captcha_success');
+                    tg.sendData('captcha_success:' + token);
                 }, 1500);
             } else {
                 document.getElementById('resultWrong').classList.remove('hidden');
