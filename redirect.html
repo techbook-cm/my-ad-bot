@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to Bot...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 350px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        a {
+            display: inline-block;
+            background: #fff;
+            color: #667eea;
+            padding: 15px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>✅ Ad Completed!</h1>
+        <div class="spinner"></div>
+        <p>Redirecting to bot to claim your reward...</p>
+        <p>If not redirected automatically:</p>
+        <a id="manualLink" href="#">Open Bot Manually</a>
+    </div>
+    <script>
+        (function () {
+            // Get token from URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var token = urlParams.get('token');
+
+            if (token) {
+                // Set manual link
+                document.getElementById('manualLink').href = 'https://t.me/MySuperCash369_bot?start=verify_' + token;
+
+                // Auto redirect after 1 second
+                setTimeout(function () {
+                    window.location.href = 'https://t.me/MySuperCash369_bot?start=verify_' + token;
+                }, 1000);
+            }
+        })();
+    </script>
+</body>
+
+</html>
