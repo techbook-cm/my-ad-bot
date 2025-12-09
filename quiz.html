@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz - Earn ₹0.05</title>
+    <title>Quiz - Earn ₹0.02</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -15,7 +15,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -29,7 +29,7 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 25px;
+            padding: 30px;
             text-align: center;
             max-width: 380px;
             width: 100%;
@@ -43,24 +43,25 @@
         }
 
         .reward {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
+            background: linear-gradient(135deg, #00b894, #00cec9);
             padding: 10px 20px;
             border-radius: 30px;
             display: inline-block;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: bold;
         }
 
-        .question-box {
+        .quiz-box {
             background: rgba(255, 255, 255, 0.15);
             border-radius: 15px;
-            padding: 20px;
-            margin: 15px 0;
+            padding: 25px;
+            margin: 20px 0;
         }
 
         .question {
             font-size: 18px;
             font-weight: bold;
+            color: #ffd700;
             margin-bottom: 20px;
             line-height: 1.4;
         }
@@ -71,88 +72,55 @@
             gap: 10px;
         }
 
-        .option {
+        .option-btn {
             width: 100%;
-            padding: 15px;
+            padding: 15px 20px;
             font-size: 16px;
+            font-weight: bold;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             cursor: pointer;
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
-            transition: all 0.3s;
+            transition: all 0.2s;
             text-align: left;
         }
 
-        .option:hover {
+        .option-btn:hover {
             background: rgba(255, 255, 255, 0.2);
-            border-color: #fff;
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
-        .option.selected {
-            background: rgba(108, 92, 231, 0.5);
-            border-color: #6c5ce7;
+        .option-btn.selected {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border-color: transparent;
         }
 
-        .option.correct {
-            background: rgba(0, 184, 148, 0.5);
-            border-color: #00b894;
+        .option-btn.correct {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border-color: transparent;
         }
 
-        .option.wrong {
-            background: rgba(255, 107, 107, 0.5);
-            border-color: #ff6b6b;
-        }
-
-        .option:disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .loading {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .loading.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #f5576c;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .option-btn.wrong {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            border-color: transparent;
         }
 
         .result {
-            display: none;
+            margin-top: 20px;
             padding: 15px;
-            border-radius: 15px;
-            margin-top: 15px;
+            border-radius: 10px;
             font-weight: bold;
         }
 
         .result.correct {
-            display: block;
             background: rgba(0, 184, 148, 0.3);
-            border: 2px solid #00b894;
+            color: #00b894;
         }
 
         .result.wrong {
-            display: block;
             background: rgba(255, 107, 107, 0.3);
-            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
         }
 
         .hidden {
@@ -162,32 +130,11 @@
 </head>
 
 <body>
-    <!-- Ad Blocker Warning Screen -->
-    <div id="adBlockScreen" class="container hidden">
-        <h1 style="color: #ff6b6b;">🚫 Ad Blocker Detected!</h1>
-        <p style="margin: 20px 0; line-height: 1.6;">
-            Please <strong>disable your ad blocker</strong> to continue.<br><br>
-            We need ads to pay your rewards!
-        </p>
-        <button onclick="location.reload()"
-            style="background: linear-gradient(135deg, #f093fb, #f5576c); margin-top: 10px;">
-            🔄 I've Disabled It - Refresh
-        </button>
-    </div>
+    <div class="container">
+        <h1>❓ Quiz Time!</h1>
+        <div class="reward">💰 Earn ₹0.02</div>
 
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="container loading active">
-        <div class="spinner"></div>
-        <h2>Loading Ad...</h2>
-        <p>Please wait for the ad to complete</p>
-    </div>
-
-    <!-- Quiz Screen -->
-    <div id="quizScreen" class="container hidden">
-        <h1>❓ Quiz Time</h1>
-        <div class="reward">💰 Earn ₹0.05</div>
-
-        <div class="question-box">
+        <div class="quiz-box">
             <div class="question" id="questionText"></div>
             <div class="options" id="optionsContainer"></div>
         </div>
@@ -196,23 +143,9 @@
             ✅ Correct! Claiming reward...
         </div>
         <div id="resultWrong" class="result wrong hidden">
-            ❌ Wrong! The correct answer was: <span id="correctAnswerText"></span>
+            ❌ Wrong answer! Better luck next time.
         </div>
     </div>
-
-    <!-- Ad Blocker Detection Script -->
-    <script>
-        window.adBlockDetected = true; // Assume blocked until proven otherwise
-    </script>
-
-    <!-- Monetag Ad Script (if this loads, it sets adBlockDetected = false) -->
-    <script>
-        (function (d, z, s) {
-            s.src = 'https://' + d + '/401/' + z;
-            s.onload = function () { window.adBlockDetected = false; };
-            try { (document.body || document.documentElement).appendChild(s) } catch (e) { }
-        })('vooculok.com', '3141294', document.createElement('script'));
-    </script>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -223,18 +156,16 @@
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token') || '';
 
-        // Quiz questions bank
+        // Quiz questions
         const questions = [
-            { q: "What is the capital of India?", options: ["Mumbai", "Delhi", "Kolkata", "Chennai"], answer: 1 },
-            { q: "How many days are in a week?", options: ["5", "6", "7", "8"], answer: 2 },
-            { q: "Which planet is known as the Red Planet?", options: ["Venus", "Jupiter", "Mars", "Saturn"], answer: 2 },
-            { q: "How many hours are in a day?", options: ["12", "20", "24", "48"], answer: 2 },
-            { q: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], answer: 3 },
-            { q: "Which animal is the King of the Jungle?", options: ["Tiger", "Lion", "Elephant", "Bear"], answer: 1 },
-            { q: "How many legs does a spider have?", options: ["4", "6", "8", "10"], answer: 2 },
-            { q: "What color is the sky on a clear day?", options: ["Green", "Red", "Blue", "Yellow"], answer: 2 },
-            { q: "What is 15 + 27?", options: ["40", "42", "44", "45"], answer: 1 },
-            { q: "How many months are in a year?", options: ["10", "11", "12", "13"], answer: 2 }
+            { q: "What is the capital of India?", options: ["A) Mumbai", "B) Delhi", "C) Kolkata", "D) Chennai"], answer: "B" },
+            { q: "How many days are in a week?", options: ["A) 5", "B) 6", "C) 7", "D) 8"], answer: "C" },
+            { q: "What is 10 + 15?", options: ["A) 20", "B) 25", "C) 30", "D) 35"], answer: "B" },
+            { q: "Which planet is known as the Red Planet?", options: ["A) Venus", "B) Mars", "C) Jupiter", "D) Saturn"], answer: "B" },
+            { q: "What is the largest ocean?", options: ["A) Atlantic", "B) Indian", "C) Pacific", "D) Arctic"], answer: "C" },
+            { q: "How many months have 31 days?", options: ["A) 5", "B) 6", "C) 7", "D) 8"], answer: "C" },
+            { q: "What is 100 / 4?", options: ["A) 20", "B) 25", "C) 30", "D) 40"], answer: "B" },
+            { q: "Which is the smallest prime number?", options: ["A) 0", "B) 1", "C) 2", "D) 3"], answer: "C" }
         ];
 
         let currentQuestion = null;
@@ -247,57 +178,48 @@
             const container = document.getElementById('optionsContainer');
             container.innerHTML = '';
 
-            currentQuestion.options.forEach((opt, index) => {
+            currentQuestion.options.forEach((option, index) => {
                 const btn = document.createElement('button');
-                btn.className = 'option';
-                btn.textContent = `${String.fromCharCode(65 + index)}) ${opt}`;
-                btn.onclick = () => selectAnswer(index, btn);
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(option[0], btn);
                 container.appendChild(btn);
             });
         }
 
-        function selectAnswer(index, btn) {
+        function selectAnswer(selected, btn) {
             if (answered) return;
             answered = true;
 
-            const allOptions = document.querySelectorAll('.option');
-            allOptions.forEach(opt => opt.disabled = true);
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
 
-            if (index === currentQuestion.answer) {
+            if (selected === currentQuestion.answer) {
                 btn.classList.add('correct');
                 document.getElementById('resultCorrect').classList.remove('hidden');
 
                 setTimeout(() => {
                     tg.sendData('quiz_success:' + token);
-                }, 1500);
+                }, 1000);
             } else {
                 btn.classList.add('wrong');
-                allOptions[currentQuestion.answer].classList.add('correct');
-                document.getElementById('correctAnswerText').textContent = currentQuestion.options[currentQuestion.answer];
                 document.getElementById('resultWrong').classList.remove('hidden');
+
+                // Find and highlight correct answer
+                allBtns.forEach(b => {
+                    if (b.textContent[0] === currentQuestion.answer) {
+                        b.classList.add('correct');
+                    }
+                });
 
                 setTimeout(() => {
                     tg.sendData('quiz_failed:' + token);
-                }, 2000);
+                }, 1500);
             }
         }
 
-        // Check for ad blocker after 2 seconds, then wait for full ad
-        setTimeout(() => {
-            if (window.adBlockDetected) {
-                // Ad blocker detected! Show warning
-                document.getElementById('loadingScreen').classList.remove('active');
-                document.getElementById('adBlockScreen').classList.remove('hidden');
-                return;
-            }
-
-            // Ad loaded successfully, wait remaining 3 seconds then show quiz
-            setTimeout(() => {
-                document.getElementById('loadingScreen').classList.remove('active');
-                document.getElementById('quizScreen').classList.remove('hidden');
-                loadQuestion();
-            }, 3000);
-        }, 2000);
+        // Initialize quiz
+        loadQuestion();
     </script>
 </body>
 
