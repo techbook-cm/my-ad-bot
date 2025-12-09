@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Captcha - Earn ₹0.05</title>
+    <title>Captcha - Earn ₹0.02</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -99,54 +99,21 @@
             box-shadow: 0 5px 20px rgba(108, 92, 231, 0.4);
         }
 
-        button:disabled {
-            background: #666;
-            cursor: not-allowed;
-        }
-
-        .loading {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .loading.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #00b894;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
         .result {
-            display: none;
-            padding: 20px;
-            border-radius: 15px;
             margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
         }
 
         .result.correct {
-            display: block;
             background: rgba(0, 184, 148, 0.3);
-            border: 2px solid #00b894;
+            color: #00b894;
         }
 
         .result.wrong {
-            display: block;
             background: rgba(255, 107, 107, 0.3);
-            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
         }
 
         .hidden {
@@ -156,29 +123,9 @@
 </head>
 
 <body>
-    <!-- Ad Blocker Warning Screen -->
-    <div id="adBlockScreen" class="container hidden">
-        <h1 style="color: #ff6b6b;">🚫 Ad Blocker Detected!</h1>
-        <p style="margin: 20px 0; line-height: 1.6;">
-            Please <strong>disable your ad blocker</strong> to continue.<br><br>
-            We need ads to pay your rewards!
-        </p>
-        <button onclick="location.reload()" style="margin-top: 10px;">
-            🔄 I've Disabled It - Refresh
-        </button>
-    </div>
-
-    <!-- Loading Screen (shows while ad loads) -->
-    <div id="loadingScreen" class="container loading active">
-        <div class="spinner"></div>
-        <h2>Loading Ad...</h2>
-        <p>Please wait for the ad to complete</p>
-    </div>
-
-    <!-- Captcha Screen -->
-    <div id="captchaScreen" class="container hidden">
+    <div class="container">
         <h1>🔢 Solve Captcha</h1>
-        <div class="reward">💰 Earn ₹0.05</div>
+        <div class="reward">💰 Earn ₹0.02</div>
 
         <div class="captcha-box">
             <div class="math-problem" id="mathProblem"></div>
@@ -194,20 +141,6 @@
         </div>
     </div>
 
-    <!-- Ad Blocker Detection Script -->
-    <script>
-        window.adBlockDetected = true; // Assume blocked until proven otherwise
-    </script>
-
-    <!-- Monetag Ad Script (if this loads, it sets adBlockDetected = false) -->
-    <script>
-        (function (d, z, s) {
-            s.src = 'https://' + d + '/401/' + z;
-            s.onload = function () { window.adBlockDetected = false; };
-            try { (document.body || document.documentElement).appendChild(s) } catch (e) { }
-        })('vooculok.com', '3141294', document.createElement('script'));
-    </script>
-
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -218,7 +151,6 @@
         const token = urlParams.get('token') || '';
 
         let correctAnswer = 0;
-        let adCompleted = false;
 
         // Generate random math problem
         function generateCaptcha() {
@@ -236,47 +168,23 @@
             document.getElementById('mathProblem').textContent = `${num1} ${op} ${num2} = ?`;
         }
 
-        // Check for ad blocker after 2 seconds, then wait for full ad
-        setTimeout(() => {
-            if (window.adBlockDetected) {
-                // Ad blocker detected! Show warning
-                document.getElementById('loadingScreen').classList.remove('active');
-                document.getElementById('adBlockScreen').classList.remove('hidden');
-                return;
-            }
-
-            // Ad loaded successfully, wait remaining 3 seconds then show captcha
-            setTimeout(() => {
-                adCompleted = true;
-                document.getElementById('loadingScreen').classList.remove('active');
-                document.getElementById('captchaScreen').classList.remove('hidden');
-                generateCaptcha();
-            }, 3000);
-        }, 2000);
-
         function checkAnswer() {
             const userAnswer = parseInt(document.getElementById('answerInput').value);
-            const submitBtn = document.getElementById('submitBtn');
 
             if (userAnswer === correctAnswer) {
                 document.getElementById('resultCorrect').classList.remove('hidden');
                 document.getElementById('resultWrong').classList.add('hidden');
-                submitBtn.disabled = true;
+                document.getElementById('submitBtn').disabled = true;
 
-                // Send result to bot WITH TOKEN
+                // Send success data with token
                 setTimeout(() => {
                     tg.sendData('captcha_success:' + token);
-                }, 1500);
+                }, 1000);
             } else {
                 document.getElementById('resultWrong').classList.remove('hidden');
                 document.getElementById('resultCorrect').classList.add('hidden');
                 document.getElementById('answerInput').value = '';
-
-                // Generate new problem
-                setTimeout(() => {
-                    document.getElementById('resultWrong').classList.add('hidden');
-                    generateCaptcha();
-                }, 2000);
+                generateCaptcha();
             }
         }
 
@@ -286,6 +194,10 @@
                 checkAnswer();
             }
         });
+
+        // Initialize captcha
+        generateCaptcha();
+        document.getElementById('answerInput').focus();
     </script>
 </body>
 
