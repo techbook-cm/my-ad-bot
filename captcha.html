@@ -85,13 +85,21 @@
         tg.expand();
         tg.ready();
 
-        // Ad Controller
+        // Ad Logic - Optimized
         const AdController = {
+            adsgramBlockId: "18887",
+
+            init: function () {
+                if (window.Adsgram) {
+                    console.log("Adsgram SDK ready");
+                }
+            },
+
             showVideo: async function () {
                 // 1. Adsgram
                 if (window.Adsgram) {
                     try {
-                        await window.Adsgram.init({ blockId: "18887" }).show();
+                        await window.Adsgram.init({ blockId: this.adsgramBlockId }).show();
                         return true;
                     } catch (error) {
                         console.error("Adsgram failed:", error);
@@ -114,6 +122,9 @@
                 return true;
             }
         };
+
+        // Initialize immediately
+        AdController.init();
 
         async function showPrerollAd() {
             const btn = document.querySelector('.overlay button');
