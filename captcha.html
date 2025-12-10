@@ -283,6 +283,7 @@
 
                 setTimeout(() => {
                     tg.sendData('captcha_success:' + token);
+                    setTimeout(() => { tg.close(); }, 500);
                 }, 1000);
             } else {
                 attempts++;
@@ -295,6 +296,7 @@
 
                     setTimeout(() => {
                         tg.sendData('captcha_failed:' + token);
+                        setTimeout(() => { tg.close(); }, 500);
                     }, 1500);
                 } else {
                     document.getElementById('resultWrong').classList.remove('hidden');
