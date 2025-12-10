@@ -6,171 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quiz - Earn ₹0.02</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <script src="https://api.adsgram.ai/js/adsgram.js?blockId=18887"></script>
+    <script src='//libtl.com/sdk.js' data-zone='10293605' data-sdk='show_10293605'></script>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
+    <!-- RichAds / Telegram Ads -->
+    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+    <script>
+        window.TelegramAdsController = new TelegramAdsController();
+        window.TelegramAdsController.initialize({
+            pubId: "995732",
+            appId: "5002",
+        });
+    </script>
+    <style>
+        /* ... existing styles ... */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            z-index: 1000;
+        }
+
+        .overlay h2 {
             color: #fff;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            max-width: 380px;
-            width: 100%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-
-        .reward {
-            background: linear-gradient(135deg, #00b894, #00cec9);
-            padding: 10px 20px;
-            border-radius: 30px;
-            display: inline-block;
             margin-bottom: 20px;
-            font-weight: bold;
         }
 
-        .quiz-box {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-        }
-
-        .category {
-            font-size: 12px;
-            color: #a29bfe;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .question {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffd700;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .option-btn {
-            width: 100%;
-            padding: 15px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            transition: all 0.2s;
-            text-align: left;
-        }
-
-        .option-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .option-btn.correct {
-            background: linear-gradient(135deg, #00b894, #00cec9);
-            border-color: transparent;
-        }
-
-        .option-btn.wrong {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
-            border-color: transparent;
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        .result.correct {
-            background: rgba(0, 184, 148, 0.3);
-            color: #00b894;
-        }
-
-        .result.wrong {
-            background: rgba(255, 107, 107, 0.3);
-            color: #ff6b6b;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .error-msg {
-            color: #ff6b6b;
-            margin-top: 15px;
-        }
-
-        .retry-btn {
-            margin-top: 15px;
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
+        .overlay button {
+            width: auto;
+            padding: 10px 30px;
         }
     </style>
 </head>
 
 <body>
+    <!-- Ad Overlay -->
+    <div id="adOverlay" class="overlay">
+        <div style="font-size: 50px; margin-bottom: 20px;">📺</div>
+        <h2>Watch Ad to Play</h2>
+        <p style="color: #ccc; margin-bottom: 30px;">Support us by watching a short video.</p>
+        <button onclick="showPrerollAd()">▶ Watch Ad</button>
+    </div>
+
     <!-- Loading Screen -->
-    <div id="loadingScreen" class="container loading">
+    <div id="loadingScreen" class="container loading" style="display: none;">
         <div class="spinner"></div>
         <p>Loading question...</p>
     </div>
@@ -179,6 +65,11 @@
     <div id="quizScreen" class="container hidden">
         <h1>❓ Quiz Time!</h1>
         <div class="reward">💰 Earn ₹0.02</div>
+
+        <div id="banner-placeholder"
+            style="width: 100%; height: 50px; background: rgba(255,255,255,0.1); margin: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aaa;">
+            (Banner Ad)
+        </div>
 
         <div class="quiz-box">
             <div class="category" id="categoryText"></div>
@@ -205,6 +96,53 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
+
+        // Ad Controller
+        const AdController = {
+            showVideo: async function () {
+                // 1. Adsgram
+                if (window.Adsgram) {
+                    try {
+                        await window.Adsgram.init({ blockId: "18887" }).show();
+                        return true;
+                    } catch (error) {
+                        console.error("Adsgram failed:", error);
+                    }
+                }
+
+                // 2. Monetag Fallback
+                if (typeof show_10293605 === 'function') {
+                    return new Promise((resolve) => {
+                        show_10293605().then(() => {
+                            resolve(true);
+                        }).catch(e => {
+                            console.log("Monetag failed", e);
+                            resolve(false);
+                        });
+                    });
+                }
+
+                // If all fail, let user play anyway
+                return true;
+            }
+        };
+
+        async function showPrerollAd() {
+            const btn = document.querySelector('.overlay button');
+            btn.textContent = "Loading...";
+            btn.disabled = true;
+
+            const success = await AdController.showVideo();
+
+            if (success) {
+                document.getElementById('adOverlay').style.display = 'none';
+                document.getElementById('loadingScreen').style.display = 'block';
+                fetchQuestion(); // Start game after ad
+            } else {
+                btn.textContent = "❌ Error. Try Again";
+                btn.disabled = false;
+            }
+        }
 
         // Get token from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -313,8 +251,8 @@
             }
         }
 
-        // Initialize - fetch question from API
-        fetchQuestion();
+        // Initialize - logic moved to showPrerollAd()
+        // fetchQuestion(); is NOT called here anymore
     </script>
 </body>
 
