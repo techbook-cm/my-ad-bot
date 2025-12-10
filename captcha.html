@@ -5,64 +5,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Captcha - Earn ₹0.02</title>
-    <script src="https://api.adsgram.ai/js/adsgram.js?blockId=18887"></script>
-    <script src='//libtl.com/sdk.js' data-zone='10293605' data-sdk='show_10293605'></script>
-
-    <!-- RichAds / Telegram Ads -->
-    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-    <script>
-        window.TelegramAdsController = new TelegramAdsController();
-        window.TelegramAdsController.initialize({
-            pubId: "995732",
-            appId: "5002",
-        });
-    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ... existing styles ... */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-        }
-
-        .overlay h2 {
+            padding: 20px;
             color: #fff;
-            margin-bottom: 20px;
         }
 
-        .overlay button {
-            width: auto;
-            padding: 10px 30px;
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .reward {
+            background: rgba(0, 255, 128, 0.2);
+            color: #00ff80;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .captcha-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .captcha-type {
+            font-size: 12px;
+            color: #a29bfe;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .math-problem {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .word-problem {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #6c5ce7;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .attempts {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .result.correct {
+            background: rgba(0, 255, 128, 0.2);
+            color: #00ff80;
+        }
+
+        .result.wrong {
+            background: rgba(255, 82, 82, 0.2);
+            color: #ff5252;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Ad Overlay -->
-    <div id="adOverlay" class="overlay">
-        <div style="font-size: 50px; margin-bottom: 20px;">📺</div>
-        <h2>Watch Ad to Play</h2>
-        <p style="color: #ccc; margin-bottom: 30px;">Support us by watching a short video.</p>
-        <button onclick="showPrerollAd()">▶ Watch Ad</button>
-    </div>
-
-    <div class="container" id="gameContainer" style="display: none;">
+    <div class="container" id="gameContainer">
         <h1>🔢 Solve Captcha</h1>
-        <!-- ... existing game content ... -->
         <div class="reward">💰 Earn ₹0.02</div>
-
-        <div id="banner-placeholder"
-            style="width: 100%; height: 50px; background: rgba(255,255,255,0.1); margin: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aaa;">
-            (Banner Ad)
-        </div>
 
         <div class="captcha-box">
             <div class="captcha-type" id="captchaType"></div>
@@ -85,65 +197,6 @@
         tg.expand();
         tg.ready();
 
-        // Ad Logic - Optimized
-        const AdController = {
-            adsgramBlockId: "18887",
-
-            init: function () {
-                if (window.Adsgram) {
-                    console.log("Adsgram SDK ready");
-                }
-            },
-
-            showVideo: async function () {
-                // 1. Adsgram
-                if (window.Adsgram) {
-                    try {
-                        await window.Adsgram.init({ blockId: this.adsgramBlockId }).show();
-                        return true;
-                    } catch (error) {
-                        console.error("Adsgram failed:", error);
-                    }
-                }
-
-                // 2. Monetag Fallback
-                if (typeof show_10293605 === 'function') {
-                    return new Promise((resolve) => {
-                        show_10293605().then(() => {
-                            resolve(true);
-                        }).catch(e => {
-                            console.log("Monetag failed", e);
-                            resolve(false);
-                        });
-                    });
-                }
-
-                // If all fail, let user play anyway
-                return true;
-            }
-        };
-
-        // Initialize immediately
-        AdController.init();
-
-        async function showPrerollAd() {
-            const btn = document.querySelector('.overlay button');
-            btn.textContent = "Loading...";
-            btn.disabled = true;
-
-            const success = await AdController.showVideo();
-
-            if (success) {
-                document.getElementById('adOverlay').style.display = 'none';
-                document.getElementById('gameContainer').style.display = 'block';
-                document.getElementById('answerInput').focus();
-            } else {
-                btn.textContent = "❌ Error. Try Again";
-                btn.disabled = false;
-            }
-        }
-
-        // ... existing captcha logic ...
         // Get token from URL
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token') || '';
@@ -159,11 +212,14 @@
         ];
 
         function generateCaptcha() {
-            // ... existing generation logic ...
             const type = captchaTypes[Math.floor(Math.random() * captchaTypes.length)];
             const container = document.getElementById('problemContainer');
             const typeLabel = document.getElementById('captchaType');
             const input = document.getElementById('answerInput');
+
+            input.value = '';
+            document.getElementById('resultWrong').classList.add('hidden');
+            document.getElementById('submitBtn').disabled = false;
 
             input.type = 'text';
 
@@ -236,6 +292,8 @@
                 }
             }
             updateAttempts();
+            // Focus immediately
+            setTimeout(() => input.focus(), 100);
         }
 
         function updateAttempts() {
@@ -286,8 +344,8 @@
             }
         });
 
+        // Start game immediately
         generateCaptcha();
-        // Don't focus immediately, wait for ad
     </script>
 </body>
 
