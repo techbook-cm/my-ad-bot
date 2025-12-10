@@ -133,13 +133,28 @@
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token') || '';
 
-        // Ad Logic
+        // Ad Logic - Optimized
         const AdController = {
+            adsgramBlockId: "18887",
+            adInstance: null,
+
+            init: function () {
+                // Initialize Adsgram early if available
+                if (window.Adsgram) {
+                    // Just caching the block reference, actual init happens on show usually regarding docs,
+                    // but we can try to pre-fetch if supported, or just keep the object ready.
+                    // Adsgram doesn't have a distinct 'preload' method in simple docs, 
+                    // but we can ensure the library is ready.
+                    console.log("Adsgram SDK ready");
+                }
+            },
+
             showRewardVideo: async function () {
                 // Priority 1: Adsgram
                 if (window.Adsgram) {
                     try {
-                        await window.Adsgram.init({ blockId: "18887" }).show();
+                        // Show immediately
+                        await window.Adsgram.init({ blockId: this.adsgramBlockId }).show();
                         return true;
                     } catch (error) {
                         console.log("Adsgram failed/skipped, trying fallback...", error);
@@ -161,6 +176,9 @@
                 return false;
             }
         };
+
+        // Initialize immediately
+        AdController.init();
 
         async function showRewardAd() {
             const btn = document.getElementById('watchBtn');
