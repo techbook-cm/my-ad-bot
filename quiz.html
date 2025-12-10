@@ -293,6 +293,7 @@
 
                 setTimeout(() => {
                     tg.sendData('quiz_success:' + token);
+                    setTimeout(() => { tg.close(); }, 500);
                 }, 1000);
             } else {
                 btn.classList.add('wrong');
@@ -307,6 +308,7 @@
 
                 setTimeout(() => {
                     tg.sendData('quiz_failed:' + token);
+                    setTimeout(() => { tg.close(); }, 500);
                 }, 1500);
             }
         }
