@@ -6,7 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Watch Ads - Earn Money</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://api.adsgram.ai/js/adsgram.js?blockId=YOUR_BLOCK_ID_HERE"></script>
+    <script src="https://api.adsgram.ai/js/adsgram.js?blockId=18887"></script>
+    <script src='//libtl.com/sdk.js' data-zone='10293605' data-sdk='show_10293605'></script>
+
+    <!-- RichAds / Telegram Ads -->
+    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+    <script>
+        window.TelegramAdsController = new TelegramAdsController();
+        window.TelegramAdsController.initialize({
+            pubId: "995732",
+            appId: "5002",
+        });
+    </script>
+
     <style>
         * {
             margin: 0;
@@ -106,7 +118,7 @@
 
         <div id="banner-container">
             <!-- Monetag/RichAds Banner will go here -->
-            (Banner Ad Slot)
+            (Sponsored Ad)
         </div>
 
         <div class="status" id="statusText">Ready to watch</div>
@@ -121,24 +133,32 @@
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token') || '';
 
-        // Placeholder wrapper for AdController (to be implemented fully later)
+        // Ad Logic
         const AdController = {
             showRewardVideo: async function () {
+                // Priority 1: Adsgram
                 if (window.Adsgram) {
                     try {
-                        const result = await window.Adsgram.init({ blockId: "YOUR_BLOCK_ID_HERE" }).show();
-                        // On success
+                        await window.Adsgram.init({ blockId: "18887" }).show();
                         return true;
                     } catch (error) {
-                        // On error or skip
-                        console.error(error);
-                        return false;
+                        console.log("Adsgram failed/skipped, trying fallback...", error);
                     }
-                } else {
-                    console.warn("Adsgram SDK not loaded yet.");
-                    // Fallback to simulation/mock for now
-                    return confirm("SIMULATION: Did you watch the ad?");
                 }
+
+                // Priority 2: Monetag
+                if (typeof show_10293605 === 'function') {
+                    return new Promise((resolve) => {
+                        show_10293605().then(() => {
+                            resolve(true);
+                        }).catch(e => {
+                            console.log("Monetag failed", e);
+                            resolve(false);
+                        });
+                    });
+                }
+
+                return false;
             }
         };
 
