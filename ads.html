@@ -165,8 +165,8 @@
             document.getElementById('title').innerText = 'Playing Ad...';
             document.getElementById('status').innerText = 'Please watch till end';
 
-            // Show Rewarded Popup ad
-            show_10293605('pop').then(() => {
+            // Show Rewarded Interstitial ad
+            show_10293605().then(() => {
                 // Ad watched successfully
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('success').style.display = 'block';
