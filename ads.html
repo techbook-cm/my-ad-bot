@@ -1,207 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Watch Ads - Earn Money</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Ad</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://api.adsgram.ai/js/adsgram.js?blockId=18887"></script>
     <script src='//libtl.com/sdk.js' data-zone='10293605' data-sdk='show_10293605'></script>
-
-    <!-- RichAds / Telegram Ads -->
-    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-    <script>
-        window.TelegramAdsController = new TelegramAdsController();
-        window.TelegramAdsController.initialize({
-            pubId: "995732",
-            appId: "5002",
-        });
-    </script>
-
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            color: white;
             padding: 20px;
-            color: #fff;
         }
-
         .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
             text-align: center;
             max-width: 350px;
-            width: 100%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #fff;
-        }
-
-        .icon-box {
+        .icon {
             font-size: 60px;
             margin-bottom: 20px;
         }
-
-        button {
-            width: 100%;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            background: linear-gradient(135deg, #00b894, #00cec9);
-            color: #fff;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-bottom: 15px;
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 184, 148, 0.4);
-        }
-
-        button:disabled {
-            background: #555;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
         .status {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #a29bfe;
+            font-size: 16px;
+            color: #a0a0a0;
+            margin-bottom: 30px;
         }
-
-        /* Banner Placeholder */
-        #banner-container {
-            margin-top: 20px;
-            width: 100%;
-            min-height: 50px;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #333;
+            border-top: 4px solid #00d26a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success {
+            background: #00d26a;
+            color: white;
+            padding: 15px 30px;
             border-radius: 10px;
-            color: #aaa;
-            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+        .error {
+            background: #ff4757;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .retry-btn {
+            background: #4a4aff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
         }
     </style>
 </head>
-
 <body>
     <div class="container">
-        <div class="icon-box">📺</div>
-        <h1>Watch Video Ads</h1>
-        <p style="margin-bottom: 25px; opacity: 0.8;">Watch a short video to earn rewards!</p>
-
-        <button id="watchBtn" onclick="showRewardAd()">▶ Watch Ad Video</button>
-
-        <div id="banner-container">
-            <!-- Monetag/RichAds Banner will go here -->
-            (Sponsored Ad)
-        </div>
-
-        <div class="status" id="statusText">Ready to watch</div>
+        <div class="icon">📺</div>
+        <h1>Loading Ad...</h1>
+        <p class="status" id="status">Please wait for the ad to load</p>
+        <div class="loader" id="loader"></div>
+        <div class="success" id="success">✅ Ad Completed!</div>
+        <div class="error" id="error">❌ Ad failed to load</div>
+        <button class="retry-btn" id="retryBtn" onclick="showAd()">🔄 Retry</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
         // Get token from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token') || '';
-
-        // Ad Logic - Optimized
-        const AdController = {
-            adsgramBlockId: "18887",
-            adInstance: null,
-
-            init: function () {
-                // Initialize Adsgram early if available
-                if (window.Adsgram) {
-                    // Just caching the block reference, actual init happens on show usually regarding docs,
-                    // but we can try to pre-fetch if supported, or just keep the object ready.
-                    // Adsgram doesn't have a distinct 'preload' method in simple docs, 
-                    // but we can ensure the library is ready.
-                    console.log("Adsgram SDK ready");
+        const token = urlParams.get('token');
+        
+        // Initialize Telegram WebApp
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+        
+        function showAd() {
+            // Reset UI
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('retryBtn').style.display = 'none';
+            document.getElementById('status').innerText = 'Please wait for the ad to load';
+            
+            // Show Rewarded Popup ad
+            show_10293605('pop').then(() => {
+                // Ad watched successfully
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('success').style.display = 'block';
+                document.getElementById('status').innerText = 'Reward claimed!';
+                
+                // Send result to bot
+                if (token) {
+                    Telegram.WebApp.sendData('ad_success:' + token);
                 }
-            },
-
-            showRewardVideo: async function () {
-                // Priority 1: Adsgram
-                if (window.Adsgram) {
-                    try {
-                        // Show immediately
-                        await window.Adsgram.init({ blockId: this.adsgramBlockId }).show();
-                        return true;
-                    } catch (error) {
-                        console.log("Adsgram failed/skipped, trying fallback...", error);
-                    }
-                }
-
-                // Priority 2: Monetag
-                if (typeof show_10293605 === 'function') {
-                    return new Promise((resolve) => {
-                        show_10293605().then(() => {
-                            resolve(true);
-                        }).catch(e => {
-                            console.log("Monetag failed", e);
-                            resolve(false);
-                        });
-                    });
-                }
-
-                return false;
-            }
-        };
-
-        // Initialize immediately
-        AdController.init();
-
-        async function showRewardAd() {
-            const btn = document.getElementById('watchBtn');
-            const status = document.getElementById('statusText');
-
-            btn.disabled = true;
-            status.textContent = "Loading Ad...";
-
-            const success = await AdController.showRewardVideo();
-
-            if (success) {
-                status.textContent = "✅ Ad Watched! Claiming reward...";
-                // Send success to bot
+                
+                // Close after short delay
                 setTimeout(() => {
-                    tg.sendData('ad_watched:' + token);
-                    setTimeout(() => { tg.close(); }, 500);
-                }, 1000);
-            } else {
-                status.textContent = "❌ Ad skipped or failed.";
-                btn.disabled = false;
-            }
+                    Telegram.WebApp.close();
+                }, 1500);
+                
+            }).catch(e => {
+                // Ad failed or was closed
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('retryBtn').style.display = 'inline-block';
+                document.getElementById('status').innerText = 'Please try again';
+            });
         }
+        
+        // Auto-start ad when page loads
+        setTimeout(showAd, 500);
     </script>
 </body>
-
 </html>
